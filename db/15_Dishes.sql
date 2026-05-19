@@ -66,7 +66,7 @@ IF NOT EXISTS (SELECT 1 FROM dbo.Dishes WHERE DishName = N'蒜香奶油蝦義大
 
 IF NOT EXISTS (SELECT 1 FROM dbo.Dishes WHERE DishName = N'法式洋蔥湯牛排')
     INSERT INTO dbo.Dishes (CategoryId, DishName, Price, IsActive, CreatedAt, Description, IsTakeOut, IsLimited, IsRecommended, IsPopular, IsVegetarian, SpicyLevel, IngredientsJson, ImageUrl)
-    VALUES (@MainId, N'法式洋蔥湯牛排', 380.00, 1, GETDATE(), N'慢炒兩小時焦糖洋蔥熬製法式金湯，搭配8oz嫩肩牛排，起司麵包浮島畫龍點睛', 1, 0, 0, 0, 0, 0, N'[{"name":"澳洲穀飼嫩肩牛排","subDesc":"8oz分切"},{"name":"法式洋蔥湯","subDesc":"焦糖洋蔥慢熬2小時"},{"name":"格呂耶爾起司","subDesc":"瑞士進口"},{"name":"法棍麵包","subDesc":"每日烘焙"},{"name":"牛高湯","subDesc":"鮮熬12小時"},{"name":"干邑白蘭地","subDesc":"法國進口提香"}]', N'法式洋蔥湯牛排.jpg');
+    VALUES (@MainId, N'法式洋蔥湯牛排', 380.00, 1, GETDATE(), N'慢炒兩小時焦糖洋蔥熬製法式金湯，搭配8oz嫩肩牛排，起司麵包浮島畫龍點睛', 1, 0, 0, 0, 0, 0, N'[{"name":"澳洲穀飼嫩肩牛排","subDesc":"8oz分切"},{"name":"法式洋蔥湯","subDesc":"焦糖洋蔥慢熬2小時"},{"name":"格呂耶爾起司","subDesc":"瑞士進口"},{"name":"法棍麵包","subDesc":"每日烘焙"},{"name":"牛高湯","subDesc":"鮮熬12小時"},{"name":"干邑白蘭地","subDesc":"法國進口提香"}]', N'法式洋蔥湯牛排.png');
 
 IF NOT EXISTS (SELECT 1 FROM dbo.Dishes WHERE DishName = N'香草烤半雞')
     INSERT INTO dbo.Dishes (CategoryId, DishName, Price, IsActive, CreatedAt, Description, IsTakeOut, IsLimited, IsRecommended, IsPopular, IsVegetarian, SpicyLevel, IngredientsJson, ImageUrl)
@@ -114,7 +114,7 @@ IF NOT EXISTS (SELECT 1 FROM dbo.Dishes WHERE DishName = N'夏威夷雞肉披薩
 
 IF NOT EXISTS (SELECT 1 FROM dbo.Dishes WHERE DishName = N'季節限定主廚套餐')
     INSERT INTO dbo.Dishes (CategoryId, DishName, Price, IsActive, CreatedAt, Description, IsTakeOut, IsLimited, IsRecommended, IsPopular, IsVegetarian, SpicyLevel, IngredientsJson, ImageUrl, StartDate, EndDate)
-    VALUES (@MainId, N'季節限定主廚套餐', 350.00, 1, GETDATE(), N'主廚依季節精選頂級食材每週更新，涵蓋前菜主餐甜點三道精緻料理', 1, 1, 1, 0, 0, 0, N'[{"name":"當季時令食材","subDesc":"每週主廚精選"},{"name":"在地有機蔬菜","subDesc":"農場直送"},{"name":"頂級蛋白質","subDesc":"依季節調整來源"},{"name":"手工主廚醬汁","subDesc":"當日特製"},{"name":"精選配菜","subDesc":"依主菜搭配調整"},{"name":"主廚創作甜點","subDesc":"當日限量"}]', N'季節限定主廚套餐.jpg',
+    VALUES (@MainId, N'季節限定主廚套餐', 350.00, 1, GETDATE(), N'主廚依季節精選頂級食材每週更新，涵蓋前菜主餐甜點三道精緻料理', 1, 1, 1, 0, 0, 0, N'[{"name":"當季時令食材","subDesc":"每週主廚精選"},{"name":"在地有機蔬菜","subDesc":"農場直送"},{"name":"頂級蛋白質","subDesc":"依季節調整來源"},{"name":"手工主廚醬汁","subDesc":"當日特製"},{"name":"精選配菜","subDesc":"依主菜搭配調整"},{"name":"主廚創作甜點","subDesc":"當日限量"}]', NULL,
     CAST(GETDATE() AS DATE), CAST(DATEADD(DAY, 30, GETDATE()) AS DATE));
 ELSE
     UPDATE dbo.Dishes SET StartDate = CAST(GETDATE() AS DATE), EndDate = CAST(DATEADD(DAY, 30, GETDATE()) AS DATE) WHERE DishName = N'季節限定主廚套餐' AND StartDate IS NULL;
@@ -128,7 +128,7 @@ ELSE
 
 IF NOT EXISTS (SELECT 1 FROM dbo.Dishes WHERE DishName = N'香煎鱸魚排')
     INSERT INTO dbo.Dishes (CategoryId, DishName, Price, IsActive, CreatedAt, Description, IsTakeOut, IsLimited, IsRecommended, IsPopular, IsVegetarian, SpicyLevel, IngredientsJson, ImageUrl)
-    VALUES (@MainId, N'香煎鱸魚排', 320.00, 1, GETDATE(), N'台灣海水鱸魚奶油煎至兩面金黃，搭配番紅花奶油醬與烤蘆筍，清淡優雅', 1, 0, 1, 1, 0, 0, N'[{"name":"台灣海水鱸魚排","subDesc":"活體現殺每日"},{"name":"西班牙番紅花","subDesc":"La Mancha產區"},{"name":"動物性鮮奶油","subDesc":"乳脂36%"},{"name":"台灣蘆筍","subDesc":"在地栽培烤製"},{"name":"法式有鹽奶油","subDesc":"發酵奶油"},{"name":"夏布利白酒","subDesc":"法國AOC認證"}]', N'香煎鱸魚排.jpg');
+    VALUES (@MainId, N'香煎鱸魚排', 320.00, 1, GETDATE(), N'台灣海水鱸魚奶油煎至兩面金黃，搭配番紅花奶油醬與烤蘆筍，清淡優雅', 1, 0, 1, 1, 0, 0, N'[{"name":"台灣海水鱸魚排","subDesc":"活體現殺每日"},{"name":"西班牙番紅花","subDesc":"La Mancha產區"},{"name":"動物性鮮奶油","subDesc":"乳脂36%"},{"name":"台灣蘆筍","subDesc":"在地栽培烤製"},{"name":"法式有鹽奶油","subDesc":"發酵奶油"},{"name":"夏布利白酒","subDesc":"法國AOC認證"}]', N'香煎鱸魚排.png');
 
 -- ==================== 2. 飲料 ====================
 IF NOT EXISTS (SELECT 1 FROM dbo.Dishes WHERE DishName = N'可樂')
