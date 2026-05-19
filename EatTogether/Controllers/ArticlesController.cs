@@ -1,4 +1,5 @@
 ﻿using EatTogether.Models.Extensions;
+using EatTogether.Models.Infra;
 using EatTogether.Models.Services;
 using EatTogether.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -61,35 +62,16 @@ namespace EatTogether.Controllers
 				// 檔案處理邏輯
 				if (vm.CoverImageFile != null && vm.CoverImageFile.Length > 0)
 				{
-					// 檢查格式
-					var supportedTypes = new[] { ".jpg", ".jpeg", ".png", ".webp" };
-					var fileExt = Path.GetExtension(vm.CoverImageFile.FileName).ToLower();
-
-					if (!supportedTypes.Contains(fileExt))
+					try
 					{
-						ModelState.AddModelError("CoverImageFile", "僅支援 JPG, PNG, WEBP 格式圖片");
+						vm.CoverImageUrl = await ImageHelper.SaveFormFileImageAsync(vm.CoverImageFile, "articles");
+					}
+					catch(InvalidOperationException ex)
+					{
+						ModelState.AddModelError("CoverImageFile", ex.Message);
 						await PopulateSelectListsAsync(vm);
 						return View(vm);
 					}
-
-					// 執行存檔 (建立唯一檔名防止覆蓋)
-					string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images", "articles");
-					if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
-
-					//string uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(vm.CoverImageFile.FileName);
-					string uniqueFileName = Guid.NewGuid().ToString("N")[..12] + fileExt;
-					string filePath = Path.Combine(uploadsFolder, uniqueFileName); 
-
-
-
-
-					using (var fileStream = new FileStream(filePath, FileMode.Create))
-					{
-						await vm.CoverImageFile.CopyToAsync(fileStream);
-					}
-
-					// 將檔案路徑存入 VM (稍後轉給 DTO 存入資料庫)
-					vm.CoverImageUrl = uniqueFileName;
 
 				}
 
@@ -159,24 +141,17 @@ namespace EatTogether.Controllers
 				// 圖片處理
 				if (vm.CoverImageFile != null && vm.CoverImageFile.Length > 0)
 				{
-					var supportedTypes = new[] { ".jpg", ".jpeg", ".png", ".webp" };
-					var fileExt = Path.GetExtension(vm.CoverImageFile.FileName).ToLower();
-					if (!supportedTypes.Contains(fileExt))
+					try
 					{
-						ModelState.AddModelError("CoverImageFile", "僅支援 JPG, PNG, WEBP 格式圖片");
+						vm.CoverImageUrl = await ImageHelper.SaveFormFileImageAsync(
+							vm.CoverImageFile, "articles");
+					}
+					catch (InvalidOperationException ex)
+					{
+						ModelState.AddModelError("CoverImageFile", ex.Message);
 						await PopulateEditSelectListsAsync(vm);
 						return View(vm);
 					}
-
-					string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images", "articles");
-					if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
-					string uniqueFileName = Guid.NewGuid().ToString("N")[..12] + fileExt;
-					string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-					using (var fileStream = new FileStream(filePath, FileMode.Create))
-					{
-						await vm.CoverImageFile.CopyToAsync(fileStream);
-					}
-					vm.CoverImageUrl = uniqueFileName;
 				}
 				else
 				{
