@@ -63,5 +63,28 @@
 				? $"/images/{subFolder}/{Path.GetFileName(match)}"
 				: null;
 		}
+
+		// 保留原始副檔名、Guid 檔名
+		public static async Task<string> SaveFormFileImageAsync(IFormFile file, string subFolder)
+		{
+			if(file == null || file.Length == 0) return null;
+
+			var supportedTypes = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+			var fileExt = Path.GetExtension(file.FileName).ToLower();
+
+			if (!supportedTypes.Contains(fileExt))
+				throw new InvalidOperationException("僅支援 JPG, PNG, WEBP 格式圖片");
+
+			var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", subFolder);
+			if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
+
+			var fileName = Guid.NewGuid().ToString("N")[..12] + fileExt;
+			var filePath = Path.Combine(folderPath, fileName);
+
+			using var stream = new FileStream(filePath, FileMode.Create);
+			await file.CopyToAsync(stream);
+
+			return fileName;
+		}
 	}
 }
