@@ -6,10 +6,6 @@ using EatTogether.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using System;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace EatTogether.Controllers        
 {
@@ -36,7 +32,7 @@ namespace EatTogether.Controllers
             var vms = dtos.Select(d =>
             {
                 var vm = d.ToViewModel();
-                vm.ImageUrl = ResolveImageUrl(vm.ImageUrl, vm.SetMealName);
+                vm.ImageUrl = ImageHelper.ResolveImageUrl(vm.ImageUrl, vm.SetMealName, "setmeals");
                 return vm;
             }).ToList();
 
@@ -97,7 +93,7 @@ namespace EatTogether.Controllers
             }
 
             if (!string.IsNullOrEmpty(vm.CroppedImageData))
-                vm.ImageUrl = await SaveBase64ImageAsync(vm.CroppedImageData, vm.SetMealName);
+                vm.ImageUrl = await ImageHelper.SaveBase64ImageAsync(vm.CroppedImageData, vm.SetMealName, "setmeals");
 
 
             await _setMealService.CreateAsync(vm.ToDto());
@@ -136,7 +132,7 @@ namespace EatTogether.Controllers
                 })
             );
 
-			vm.ImageUrl = ResolveImageUrl(vm.ImageUrl, vm.SetMealName);
+			vm.ImageUrl = ImageHelper.ResolveImageUrl(vm.ImageUrl, vm.SetMealName, "setmeals");
 
 			return View(vm);
         }
@@ -165,7 +161,7 @@ namespace EatTogether.Controllers
             if (!string.IsNullOrEmpty(vm.CroppedImageData))
             {
                 // 強制覆蓋原有檔案，並用餐點名稱命名
-                vm.ImageUrl = await SaveBase64ImageAsync(vm.CroppedImageData, vm.SetMealName);
+                vm.ImageUrl = await ImageHelper.SaveBase64ImageAsync(vm.CroppedImageData, vm.SetMealName, "setmeals");
             }
 
             await _setMealService.UpdateAsync(vm.ToDto());
@@ -274,63 +270,6 @@ namespace EatTogether.Controllers
             return Ok(new { newId });
         }
 
-        private string ResolveImageUrl(string storedUrl, string name)
-        {
-            if (!string.IsNullOrEmpty(storedUrl)) return storedUrl;
-
-            string safeName = name;
-            foreach (char c in Path.GetInvalidFileNameChars())
-                safeName = safeName.Replace(c, '_');
-
-            var folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
-            if (System.IO.File.Exists(Path.Combine(folder, safeName + ".jpg")))
-                return "/images/" + safeName + ".jpg";
-            if (System.IO.File.Exists(Path.Combine(folder, safeName + ".png")))
-                return "/images/" + safeName + ".png";
-
-            return storedUrl;
-        }
-
-        private async Task<string> SaveBase64ImageAsync(string base64Data, string fileNamePrefix)
-        {
-            if (string.IsNullOrEmpty(base64Data)) return null;
-
-            var base64 = base64Data.Contains(",") ? base64Data.Split(',')[1] : base64Data;
-            var bytes = Convert.FromBase64String(base64);
-
-            // 移除檔名中不合法的字元
-            string sanitizedPrefix = fileNamePrefix;
-            foreach (char c in Path.GetInvalidFileNameChars())
-            {
-                sanitizedPrefix = sanitizedPrefix.Replace(c, '_');
-            }
-
-            var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
-            if (!Directory.Exists(folderPath))
-            {
-                Directory.CreateDirectory(folderPath);
-            }
-
-            // 存檔前先刪除同名的 .png 和 .jpeg 舊檔
-            string pngToDelete = Path.Combine(folderPath, $"{sanitizedPrefix}.png");
-            if (System.IO.File.Exists(pngToDelete))
-            {
-                System.IO.File.Delete(pngToDelete);
-            }
-            string jpegToDelete = Path.Combine(folderPath, $"{sanitizedPrefix}.jpeg");
-            if (System.IO.File.Exists(jpegToDelete))
-            {
-                System.IO.File.Delete(jpegToDelete);
-            }
-
-            // 儲存新的 .jpg 檔案
-            string newJpgFileName = $"{sanitizedPrefix}.jpg";
-            var savePath = Path.Combine(folderPath, newJpgFileName);
-            await System.IO.File.WriteAllBytesAsync(savePath, bytes);
-
-            return "/images/" + newJpgFileName;
-        }
-
         [HttpPost("UpdateItems/{setMealId}")]
         public async Task<IActionResult> UpdateItems(int setMealId, [FromBody] List<SetMealItemViewModel> items)
         {
@@ -356,7 +295,7 @@ namespace EatTogether.Controllers
             var dtos = await _setMealService.GetAllActiveAsync();
 
             return Json(dtos.Select(d => {
-                string imageUrl = ResolveImageUrl(d.ImageUrl, d.SetMealName);
+                string imageUrl = ImageHelper.ResolveImageUrl(d.ImageUrl, d.SetMealName, "setmeals");
                 return new {
                     id = d.Id,
                     setMealName = d.SetMealName,

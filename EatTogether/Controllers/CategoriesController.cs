@@ -4,11 +4,6 @@ using EatTogether.Models.Services;
 using EatTogether.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using System;
 
 namespace EatTogether.Controllers
 {
@@ -185,10 +180,10 @@ namespace EatTogether.Controllers
 
 			return options;
 		}
+
 		// ── 圖片上傳 ──────────────────────────────────────
 		// 接收前端裁切後的 base64，存到 wwwroot/images/categories/
 		// 回傳可直接使用的相對路徑 /images/categories/xxx.jpg
-
 		[HttpPost]
 		public async Task<IActionResult> UploadImage([FromBody] CategoryImageUploadRequest request)
 		{
@@ -197,37 +192,13 @@ namespace EatTogether.Controllers
 				if (string.IsNullOrEmpty(request?.Base64Data))
 					return BadRequest("未提供圖片資料");
 
-				var imageUrl = await SaveCategoryImageAsync(request.Base64Data, request.CategoryName);
+				var imageUrl = await ImageHelper.SaveBase64ImageAsync(request.Base64Data, request.CategoryName, "categories");
 				return Ok(new { imageUrl });
 			}
 			catch (Exception ex)
 			{
 				return StatusCode(500, new { message = "圖片處理失敗: " + ex.Message });
 			}
-		}
-
-		// ── 私有存檔方法（根據使用者要求修改）──
-		private async Task<string> SaveCategoryImageAsync(string base64Data, string fileNamePrefix)
-		{
-			if (string.IsNullOrEmpty(base64Data)) return null;
-			var base64 = base64Data.Contains(",") ? base64Data.Split(',')[1] : base64Data;
-			var bytes = Convert.FromBase64String(base64);
-			string fileName = $"{fileNamePrefix}.jpg";
-			foreach (char c in Path.GetInvalidFileNameChars())
-				fileName = fileName.Replace(c, '_');
-			var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "categories");
-			if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
-
-			// 刪除同名的舊檔（.png / .jpeg）
-			var baseName = Path.GetFileNameWithoutExtension(fileName);
-			foreach (var ext in new[] { ".png", ".jpeg" })
-			{
-				var oldFile = Path.Combine(folderPath, baseName + ext);
-				if (System.IO.File.Exists(oldFile)) System.IO.File.Delete(oldFile);
-			}
-
-			await System.IO.File.WriteAllBytesAsync(Path.Combine(folderPath, fileName), bytes);
-			return "/images/categories/" + fileName;
 		}
 	}
 }
